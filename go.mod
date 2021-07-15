@@ -1,4 +1,4 @@
-module github.com/scraperwall/linenumberhook
+module github.com/scraperwall/logrus-linenumberhook
 
 go 1.16
 
