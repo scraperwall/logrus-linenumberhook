@@ -13,6 +13,10 @@ type Hook struct {
 	skip int
 }
 
+func New() *Hook {
+	return &Hook{skip: -1}
+}
+
 func (hook *Hook) Levels() []log.Level {
 	return log.AllLevels
 }
