@@ -35,7 +35,7 @@ func (hook *Hook) Fire(entry *log.Entry) error {
 
 			fname := runtime.FuncForPC(pc).Name()
 			if !strings.Contains(file, "sirupsen/logrus") && !strings.Contains(fname, "linenumberhook") {
-				hook.skip = i
+				hook.skip = i - 1
 				break
 			}
 
