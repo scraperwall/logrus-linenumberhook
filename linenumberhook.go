@@ -10,11 +10,10 @@ import (
 )
 
 type Hook struct {
-	skip int
 }
 
 func New() *Hook {
-	return &Hook{skip: -1}
+	return &Hook{}
 }
 
 func (hook *Hook) Levels() []log.Level {
@@ -23,33 +22,34 @@ func (hook *Hook) Levels() []log.Level {
 
 func (hook *Hook) Fire(entry *log.Entry) error {
 	// determine the call stack skip level for logrus to print the calling file/function/line number
-	if hook.skip == -1 {
-		i := 0
-		for {
-			pc, file, _, ok := runtime.Caller(i)
 
-			if !ok {
-				hook.skip = -2
-				break
-			}
+	skip := -1
+	i := 0
 
-			fname := runtime.FuncForPC(pc).Name()
-			if !strings.Contains(file, "sirupsen/logrus") && !strings.Contains(fname, "linenumberhook") {
-				hook.skip = i - 1
-				break
-			}
+	for {
+		pc, file, _, ok := runtime.Caller(i)
 
-			i++
+		if !ok {
+			skip = -2
+			break
 		}
+
+		fname := runtime.FuncForPC(pc).Name()
+		if !strings.Contains(file, "sirupsen/logrus") && !strings.Contains(fname, "linenumberhook") {
+			skip = i - 1
+			break
+		}
+
+		i++
 	}
 
 	// don't try to add the file/func/line number info if the skip level couldn't be determined
-	if hook.skip < 0 {
+	if skip < 0 {
 		return nil
 	}
 
 	// add the file, func name and line number in each log entry
-	if pc, file, line, ok := runtime.Caller(hook.skip + 1); ok {
+	if pc, file, line, ok := runtime.Caller(skip + 1); ok {
 		funcName := runtime.FuncForPC(pc).Name()
 
 		entry.Data["src"] = fmt.Sprintf("%s:%v:%s", path.Base(file), line, path.Base(funcName))
